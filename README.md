@@ -7,3 +7,6 @@ Copyright Token:  https://ropsten.etherscan.io/address/0x93c086674e90084eba27aa7
 
 
 ![IP COPYRIGHTS EXCHANGE](ppt_cover.png)
+
+#Start up service
+npm run D

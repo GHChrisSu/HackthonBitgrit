@@ -176,14 +176,12 @@ $(document).ready(function () {
 
 // Add counter
 $(document).ready(function () {
-
     $('.counter-num').counterUp({
         delay: 10,
         time: 2000
     });
-
     $("#buy-ip-copyright").click(function () {
-        dosomething();
+        buyIpCopyright();
     });
 });
 
@@ -200,82 +198,22 @@ window.addEventListener('load', function () {
 
 })
 
-function dosomething() {
+function buyIpCopyright() {
     // 获取当前metamask上激活的账户
     var userAccount = web3.eth.accounts[0];
-    var toAccount = "0x5fA7241620B064bDBDcd8C14e3A1C0b1e5266521";
+    var toAccount = "0x81a79ec31ee2de90a8bc7c4bd7e6160546be6b7a";
     if (typeof userAccount !== 'undefined') {
         // 当前用户余额是否大于费用
         var price = $("#price").val();
-        var rate = $("#rate").val();
         var accountBalance;
-        var didPrivateKey;
-        var did;
         web3.eth.getBalance(userAccount, (error, balance) => {
             if (error) return;
             accountBalance = balance.c[0];
             if (accountBalance < price * (10000)) {
                 alert("余额不足");
             } else {
-                // 调用did接口生成新的did
-                $.ajax({
-                    type: "GET",
-                    url: "http://18.179.20.67:8080/api/1/did",
-                    success: function (resp) {
-                        // console.log(resp);
-                        var jsonResult = JSON.parse(resp);
-                        didPrivateKey = jsonResult.result.privateKey;
-                        publicKey = jsonResult.result.publicKey;
-                        did = jsonResult.result.did;
-
-                    },
-                    error: function (e) {
-                        alert('出问题了' + e);
-                    }
-                });
-
-                // setdidInfo
-                // var setDidInfoData = ;
-                // 设定didinfo，返回txid
-                $.ajax({
-                    type: "POST",
-                    url: "http://18.179.20.67:8080/api/1/setDidInfo",
-                    contentType: 'application/json;charset=UTF-8',
-                    data: {
-                        "privateKey": "C740869D015E674362B1F441E3EDBE1CBCF4FE8B709AA1A77E5CCA2C92BAF99D",
-                        "settings": {
-                            "privateKey": "E763239857B390502289CF75FF06EEEDC3252A302C50E1CBB7E5FAC8A703486F",
-                            "info": {
-                                "family": {
-                                    "child": 4000,
-                                    "money": 10000,
-                                    "history": "hey myfriend,watch your language"
-                                }
-                            }
-                        }
-                    },
-
-
-                    // {
-                    //    "privateKey": "4439D27F693591C17EF3358BA6DD8D2B0598F62C24959E9DB926C7B4730679D8",
-                    //    "settings": {
-                    //      "privateKey": "ACDD5F69072C3A9D4BE09FECCD1A2EDF95412AF343917C13398B3945ECDFE91B",
-                    //      "info": {
-                    //        "ACDD5F69072C3A9D4BE09FECCD1A2EDF95": {
-                    //          "child": 4000,
-                    //          "money": 10000,
-                    //          "history": ["hello","how","what"]
-                    //        }
-                    //      }
-                    //    }
-                    //  },
-                    success: function (resp) {
-                        console.log(resp);
-                    },
-                    error: function (e) {
-                        alert('出问题了' + e);
-                    }
-                });
+                // send the transaction
+                transfer(userAccount, toAccount, price);
             }
         });
 
