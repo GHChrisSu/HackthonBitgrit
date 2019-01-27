@@ -3,9 +3,9 @@ pragma solidity ^0.4.25;
 contract IPAuthorization {
     using SafeMath for *;
     event NewIP(address IPOwner, string name, bytes32 ISBN, uint price);
-    address myAddress = this;
-    function getOwnerBalance() constant public returns (uint) {
-        return myAddress.balance;
+    address Contract = this;
+    function getContractBalance() constant public returns (uint) {
+        return Contract.balance;
     }
 
     struct IP {
@@ -20,20 +20,24 @@ contract IPAuthorization {
 
     mapping(address => IP[]) public IPOwnersProductForQuery;
     mapping(address => IP[]) public BuyersProductForQuery;
-    //   mapping(bytes32 => bool) notUsed;
+    mapping(bytes32 => bool) private used;
 
     function publishIP(string _name, uint _price) public {
         bytes32 ISBN = keccak256(_name);
-        // require(notUsed[ISBN]);
+        require(!used[ISBN], "The IP already exists!");
+        require(_price >= 100 wei, "Make your product at least 100 wei!");
         IP memory newIp = IP(_name, _price, ISBN, msg.sender);
         IPOwnersProduct[msg.sender][ISBN] = newIp;
         IPOwnersProductForQuery[msg.sender].push(newIp);
-        // notUsed[ISBN] = false;
+        used[ISBN] = true;
         emit NewIP(msg.sender, _name, ISBN, _price);
     }
 
     function buyIP(address IPOwner, bytes32 ISBN) payable external isHuman() {
+        require(used[ISBN], "The IP is not exists!");
         IP storage ip = IPOwnersProduct[IPOwner][ISBN];
+        require(ip.owner != 0x0000000000000000000000000000000000000000, "The author is not exists!");
+        require(ip.price == msg.value, "give the right money to author");
         BuyersProduct[msg.sender][ISBN] = ip;
         BuyersProductForQuery[msg.sender].push(ip);
         ip.owner.transfer(msg.value.div(5).mul(4));

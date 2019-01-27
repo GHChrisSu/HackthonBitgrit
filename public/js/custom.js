@@ -180,28 +180,35 @@ $(document).ready(function () {
         delay: 10,
         time: 2000
     });
-    $("#buy-ip-copyright").click(function () {
-        buyIpCopyright();
-    });
 });
-
 
 window.addEventListener('load', function () {
     // 检查web3是否已经注入到(Mist/MetaMask)
     if (typeof web3 !== 'undefined') {
         // 使用 Mist/MetaMask 的提供者
         console.log("web3 new Instance");
-        web3 = new Web3(web3.currentProvider);
+        web3js = web3.currentProvider;
     } else {
-        alert("安装 MetaMask");
+        alert("Please install MetaMask!");
     }
+    web3 = new Web3(web3js);
+    startApp();
+    $("#buy-ip-copyright").click(function () {
+        buyIpCopyright();
+    });
+});
 
-})
+var contract;
+function startApp() {
+    var contractAddress = "0x520a56cef858bfd92d9e80a45715f0144d974fe8";
+    contract = web3.eth.contract(Contract_ABI, contractAddress);
+}
 
 function buyIpCopyright() {
     // 获取当前metamask上激活的账户
     var userAccount = web3.eth.accounts[0];
-    var toAccount = "0x81a79ec31ee2de90a8bc7c4bd7e6160546be6b7a";
+    var ipOwner = '0x23C9b93B1b73Ad6002D2e41f73D1d956dECdAD3B';
+    // var ISBN = '0xdfa57c542fea29ed292cef0ce135d0e22189365fa59abedc7a310b751ace684f';
     if (typeof userAccount !== 'undefined') {
         // 当前用户余额是否大于费用
         var price = $("#price").val();
@@ -213,7 +220,8 @@ function buyIpCopyright() {
                 alert("余额不足");
             } else {
                 // send the transaction
-                transfer(userAccount, toAccount, price);
+                transfer(userAccount, ipOwner, price);
+                // contract.abi.buyIP(ipOwner, web3.fromAscii('aa')).send({ from: userAccount, value: 100 });
             }
         });
 
@@ -245,27 +253,6 @@ function transfer(fromAccount, toAccount, amount) {
             }
         });
     }
-}
-
-function saveInfoToetherum() {
-    // 实例化 myContract
-    var myContract = new web3js.eth.Contract(myABI, myContractAddress);
-    myContract.methods.myMethod(123).call();
-    // 这将需要一段时间，所以在界面中告诉用户这一点
-    // 事务被发送出去了
-    $("#txStatus").text("正在区块链上创建僵尸，这将需要一会儿...");
-    // 把事务发送到我们的合约:
-    return cryptoZombies.methods.createRandomZombie(name)
-        .send({from: userAccount})
-        .on("receipt", function (receipt) {
-            $("#txStatus").text("成功生成了 " + name + "!");
-            // 事务被区块链接受了，重新渲染界面
-            getZombiesByOwner(userAccount).then(displayZombies);
-        })
-        .on("error", function (error) {
-            // 告诉用户合约失败了
-            $("#txStatus").text(error);
-        });
 }
 
 // Add animation/ Initialize Woo
